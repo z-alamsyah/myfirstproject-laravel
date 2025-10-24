@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\UserService;
+use App\Http\Middleware\JwtCookieMiddleware;
 
 class Login extends Controller
 {
@@ -49,9 +50,13 @@ class Login extends Controller
             // Login berhasil - simpan user info di session
             $request->session()->put('user_id', $loginResult['user']->id);
             $request->session()->put('username', $loginResult['user']->user);
-            $request->session()->put('jwt_token', $loginResult['token']);
 
-            return redirect('/dashboard')->with('success', 'Login berhasil! JWT token generated.');
+            // Set JWT token in cookie for automatic API authentication
+            $cookie = JwtCookieMiddleware::setJwtCookie($loginResult['token'], $loginResult['expires_in'] / 60);
+
+            return redirect('/dashboard')
+                ->with('success', 'Login berhasil! JWT token stored in cookie.')
+                ->cookie($cookie);
         } else {
             // Login gagal
             return redirect()->back()->with('error', 'Username atau password salah!');
@@ -59,20 +64,22 @@ class Login extends Controller
     }
     
     /**
-     * Logout with JWT token invalidation
+     * Logout with JWT token invalidation and cookie clearing
      */
     public function logout(Request $request)
     {
         // Invalidate JWT token if exists
-        if ($request->session()->has('jwt_token')) {
-            $this->userService->logout();
-        }
+        $this->userService->logout();
+
+        // Clear JWT token cookie
+        $clearCookie = JwtCookieMiddleware::clearJwtCookie();
 
         // Hapus session
         $request->session()->forget('user_id');
         $request->session()->forget('username');
-        $request->session()->forget('jwt_token');
 
-        return redirect('/login')->with('success', 'Logout berhasil! JWT token invalidated.');
+        return redirect('/login')
+            ->with('success', 'Logout berhasil! JWT token cleared from cookie.')
+            ->cookie($clearCookie);
     }
 }
