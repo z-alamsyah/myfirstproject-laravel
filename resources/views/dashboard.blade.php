@@ -111,10 +111,22 @@
             <p>Anda berhasil login ke sistem.</p>
             
             <div class="user-info">
-                <h3>Informasi User</h3>
+                <h3>🔐 User Information (JWT Authenticated)</h3>
                 <p><strong>Username:</strong> {{ $username }}</p>
                 <p><strong>User ID:</strong> {{ session('user_id') }}</p>
             </div>
+
+            @if($jwt_token)
+                <div class="jwt-token-section" style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-top: 20px; border: 2px solid #e9ecef;">
+                    <h3 style="color: #495057; margin-bottom: 15px;">🔑 JWT Token Information</h3>
+
+                    <div style="background: white; padding: 15px; border-radius: 5px; margin-bottom: 15px; border-left: 4px solid #28a745;">
+                        <p style="margin: 0; font-family: 'Courier New', monospace; font-size: 12px; word-break: break-all;">
+                            <strong>Token:</strong> {{ $jwt_token }}
+                        </p>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 </body>

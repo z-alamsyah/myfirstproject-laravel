@@ -31,9 +31,10 @@ Route::get('/dashboard', function () {
     if (!session()->has('user_id')) {
         return redirect('/login')->with('error', 'Silakan login terlebih dahulu!');
     }
-    
+
     return view('dashboard', [
-        'username' => session('username')
+        'username' => session('username'),
+        'jwt_token' => session('jwt_token'),
+        'user_id' => session('user_id')
     ]);
 })->name('dashboard');
-
